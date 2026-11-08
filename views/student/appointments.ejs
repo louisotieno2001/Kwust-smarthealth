@@ -1,0 +1,53 @@
+<%- include('../partials/portal-start', { title: 'My appointments' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Appointments</span>
+      <h1>My appointments</h1>
+      <p>Review upcoming and past visits, or book a new appointment slot.</p>
+    </div>
+    <div class="page-actions"><a href="/student/appointments/book" class="btn btn-primary">Book appointment</a></div>
+  </div>
+
+  <section class="card">
+    <% if (appointments.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Date</th><th>Time</th><th>Clinician</th><th>Location</th><th>Reason</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            <% appointments.forEach((appointment) => { %>
+              <tr>
+                <td class="nowrap"><%= formatDate(appointment.slot_id?.date) %></td>
+                <td class="nowrap"><%= formatTime(appointment.slot_id?.start_time) %> – <%= formatTime(appointment.slot_id?.end_time) %></td>
+                <td><%= appointment.clinician_id?.full_name || 'Clinician' %><br><small class="muted"><%= appointment.clinician_id?.staff_title || '' %></small></td>
+                <td><%= appointment.slot_id?.location || 'Health Center' %></td>
+                <td><%= appointment.reason || '—' %></td>
+                <td><span class="badge badge-<%= statusClass(appointment.status) %>"><%= statusLabel(appointment.status) %></span></td>
+                <td class="table-actions">
+                  <% if (appointment.status === 'booked') { %>
+                    <form action="/student/appointments/<%= appointment.id %>/cancel" method="post" data-confirm="Cancel this appointment?">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-ghost btn-sm">Cancel</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <strong>No appointments yet</strong>
+        <span>Book a slot to see a clinician.</span>
+        <div class="mt-1"><a href="/student/appointments/book" class="btn btn-primary btn-sm">Book appointment</a></div>
+      </div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

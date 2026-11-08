@@ -1,0 +1,58 @@
+<%- include('../partials/portal-start', { title: 'Book appointment' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">New appointment</span>
+      <h1>Available appointment slots</h1>
+      <p>Choose an open slot. Slots are published by clinicians and show remaining capacity.</p>
+    </div>
+    <div class="page-actions"><a href="/student/appointments" class="btn btn-secondary">My appointments</a></div>
+  </div>
+
+  <% if (slots.length) { %>
+    <div class="grid grid-2">
+      <% slots.forEach((slot) => { %>
+        <% const alreadyBooked = bookedSlotIds.has(String(slot.id)); %>
+        <article class="card">
+          <div class="card-header">
+            <h2><%= formatDate(slot.date) %></h2>
+            <span class="badge badge-<%= slot.remaining > 0 ? 'success' : 'danger' %>"><%= slot.remaining %> / <%= slot.capacity %> left</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item"><div class="meta-label">Time</div><div class="meta-value"><%= formatTime(slot.start_time) %> – <%= formatTime(slot.end_time) %></div></div>
+            <div class="meta-item"><div class="meta-label">Clinician</div><div class="meta-value"><%= slot.clinician_id?.full_name || 'Clinician' %></div></div>
+            <div class="meta-item"><div class="meta-label">Location</div><div class="meta-value"><%= slot.location || 'Health Center' %></div></div>
+          </div>
+          <p class="helper mt-1"><%= slot.clinician_id?.staff_title || 'Clinician' %></p>
+
+          <% if (alreadyBooked) { %>
+            <span class="badge badge-info">You have booked this slot</span>
+          <% } else if (slot.remaining <= 0 || slot.status !== 'open') { %>
+            <span class="badge badge-danger">Slot full or closed</span>
+          <% } else { %>
+            <form action="/student/appointments" method="post" class="form mt-1" data-submit-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="slot_id" value="<%= slot.id %>">
+              <div class="field">
+                <label for="reason-<%= slot.id %>">Reason for visit <span class="muted">(optional)</span></label>
+                <textarea id="reason-<%= slot.id %>" name="reason" rows="2" maxlength="1000" placeholder="Briefly describe your concern"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" data-loading-text="Booking...">Book this slot</button>
+            </form>
+          <% } %>
+        </article>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <section class="card">
+      <div class="empty-state">
+        <strong>No open appointment slots</strong>
+        <span>Please check again later or contact the health center directly.</span>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<%- include('../partials/portal-end') %>

@@ -1,0 +1,165 @@
+<%- include('../partials/head', { title: 'Sign up' }) %>
+<%- include('../partials/header') %>
+
+<main id="main" class="container">
+  <div class="auth-shell">
+    <aside class="auth-aside">
+      <span class="eyebrow">Get started</span>
+      <h1>Create your account</h1>
+      <p class="muted">Choose the account type that matches your role. Student accounts require a valid admission number. Clinician and administrator accounts use email only.</p>
+      <div class="card mt-2">
+        <h3>Admission number format</h3>
+        <p class="muted">Accepted examples include <strong>BBIT/45/26</strong>, <strong>BBIT/045/2026</strong>, <strong>bbit-45-26</strong>, and <strong>KCS/063/24</strong>.</p>
+      </div>
+    </aside>
+
+    <section class="card auth-card">
+      <%- include('../partials/flash') %>
+      <div class="role-tabs" role="tablist" aria-label="Account type">
+        <a href="/signup?role=student" class="<%= role === 'student' ? 'active' : '' %>">Student</a>
+        <a href="/signup?role=clinician" class="<%= role === 'clinician' ? 'active' : '' %>">Clinician</a>
+        <a href="/signup?role=admin" class="<%= role === 'admin' ? 'active' : '' %>">Administrator</a>
+      </div>
+
+      <% if (role === 'student') { %>
+        <div class="card-header">
+          <h2>Student sign up</h2>
+          <span class="tag">Admission number required</span>
+        </div>
+        <form action="/auth/signup/student" method="post" class="form" data-submit-once>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="student-name">Full name</label>
+              <input id="student-name" name="full_name" type="text" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="admission-number">Admission number</label>
+              <input id="admission-number" name="admission_number" type="text" placeholder="BBIT/45/26" required>
+              <small>Formats such as BBIT/45/26, BBIT/045/2026, or bbit-45-26 are accepted.</small>
+            </div>
+            <div class="field">
+              <label for="student-email">Email <span class="muted">(optional)</span></label>
+              <input id="student-email" name="email" type="email" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="student-phone">Phone <span class="muted">(optional)</span></label>
+              <input id="student-phone" name="phone" type="tel" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="student-password">Password</label>
+              <div class="password-wrap">
+                <input id="student-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="student-password" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="student-confirm">Confirm password</label>
+              <div class="password-wrap">
+                <input id="student-confirm" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="student-confirm" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" data-loading-text="Creating account...">Create student account</button>
+        </form>
+      <% } else if (role === 'clinician') { %>
+        <div class="card-header">
+          <h2>Clinician sign up</h2>
+          <span class="tag">No admission number needed</span>
+        </div>
+        <form action="/auth/signup/clinician" method="post" class="form" data-submit-once>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="clinician-name">Full name</label>
+              <input id="clinician-name" name="full_name" type="text" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="clinician-email">Email</label>
+              <input id="clinician-email" name="email" type="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="clinician-phone">Phone <span class="muted">(optional)</span></label>
+              <input id="clinician-phone" name="phone" type="tel" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="staff-title">Role / title</label>
+              <select id="staff-title" name="staff_title">
+                <option value="Clinician">Clinician</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Pharmacist">Pharmacist</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="staff-number">Staff number <span class="muted">(optional)</span></label>
+              <input id="staff-number" name="staff_number" type="text">
+            </div>
+            <div class="field">
+              <label for="clinician-password">Password</label>
+              <div class="password-wrap">
+                <input id="clinician-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="clinician-password" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="clinician-confirm">Confirm password</label>
+              <div class="password-wrap">
+                <input id="clinician-confirm" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="clinician-confirm" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+          </div>
+          <p class="helper">Clinician accounts require administrator approval before you can log in.</p>
+          <button type="submit" class="btn btn-primary btn-block" data-loading-text="Submitting...">Request clinician account</button>
+        </form>
+      <% } else { %>
+        <div class="card-header">
+          <h2>Administrator sign up</h2>
+          <span class="tag">Invite code required</span>
+        </div>
+        <form action="/auth/signup/admin" method="post" class="form" data-submit-once>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="admin-name">Full name</label>
+              <input id="admin-name" name="full_name" type="text" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="admin-email">Email</label>
+              <input id="admin-email" name="email" type="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="invite-code">Administrator invite code</label>
+              <input id="invite-code" name="invite_code" type="text" required>
+            </div>
+            <div class="field">
+              <label for="admin-password">Password</label>
+              <div class="password-wrap">
+                <input id="admin-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="admin-password" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="admin-confirm">Confirm password</label>
+              <div class="password-wrap">
+                <input id="admin-confirm" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+                <button type="button" class="password-toggle" data-password-toggle="admin-confirm" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+            </div>
+          </div>
+          <p class="helper">Administrator accounts require an invite code and approval by an existing administrator.</p>
+          <button type="submit" class="btn btn-primary btn-block" data-loading-text="Submitting...">Request administrator account</button>
+        </form>
+      <% } %>
+
+      <div class="auth-links mt-2">
+        <span class="muted">Already have an account? <a href="/login">Log in</a></span>
+        <a href="/">Back to home</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

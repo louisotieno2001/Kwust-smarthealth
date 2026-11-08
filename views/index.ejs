@@ -1,0 +1,23 @@
+<%- include('partials/head', { title: 'Welcome' }) %>
+<%- include('partials/header') %>
+
+<main id="main" class="container">
+  <section class="welcome">
+    <span class="eyebrow">University Health Center</span>
+    <h1>Welcome to KWUST SmartHealth</h1>
+    <p class="lead">Manage appointments, view medical records, track prescriptions, and stay connected with the clinic.</p>
+    <div class="welcome-actions">
+      <% if (user) { %>
+        <a href="<%= user.role === 'student' ? '/student/dashboard' : user.role === 'clinician' ? '/clinician/dashboard' : '/admin/dashboard' %>" class="btn btn-primary">Open my dashboard</a>
+      <% } else { %>
+        <a href="/signup" class="btn btn-primary">Create an account</a>
+        <a href="/login" class="btn btn-secondary">Log in</a>
+      <% } %>
+    </div>
+    <% if (!user) { %>
+      <p class="helper mt-2">Students use their admission number. Clinicians and administrators use their staff email.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

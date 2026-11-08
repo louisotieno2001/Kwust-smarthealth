@@ -1,0 +1,58 @@
+<%- include('../partials/portal-start', { title: 'Send reminders' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Patient communication</span>
+      <h1>Send a reminder</h1>
+      <p>Send a follow-up, medication, or general health reminder to a student.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <section class="card">
+      <div class="card-header"><h2>Reminder details</h2></div>
+      <form action="/clinician/reminders" method="post" class="form" data-submit-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="student-id">Student</label>
+          <select id="student-id" name="student_id" required>
+            <option value="">Select a student</option>
+            <% students.forEach((student) => { %>
+              <option value="<%= student.id %>"><%= student.full_name %> — <%= student.admission_number %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="reminder-type">Type</label>
+          <select id="reminder-type" name="type">
+            <option value="general">General</option>
+            <option value="appointment">Appointment</option>
+            <option value="medication">Medication</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="reminder-title">Title</label>
+          <input id="reminder-title" name="title" type="text" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label for="reminder-message">Message</label>
+          <textarea id="reminder-message" name="message" rows="6" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" data-loading-text="Sending...">Send reminder</button>
+      </form>
+    </section>
+
+    <aside class="card">
+      <div class="card-header"><h2>Reminder guidance</h2></div>
+      <ul class="list">
+        <li class="list-item"><span><strong>Appointment reminders</strong><p class="muted">Confirm the date, time, and location of a visit.</p></span></li>
+        <li class="list-item"><span><strong>Medication reminders</strong><p class="muted">Remind students about dosage, frequency, and duration.</p></span></li>
+        <li class="list-item"><span><strong>General reminders</strong><p class="muted">Share health education or follow-up instructions.</p></span></li>
+      </ul>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

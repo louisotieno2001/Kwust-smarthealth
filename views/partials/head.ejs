@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KWUST SmartHealth — university healthcare management system">
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <title><%= typeof title !== 'undefined' && title ? title + ' · ' : '' %>KWUST SmartHealth</title>
+  <link rel="icon" href="/images/kwust.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="<%= asset('css/normalize.css') %>">
+  <link rel="stylesheet" href="<%= asset('css/main.css') %>">
+  <script src="<%= asset('scripts/theme.js') %>"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>

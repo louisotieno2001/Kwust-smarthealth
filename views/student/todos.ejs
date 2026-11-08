@@ -1,0 +1,60 @@
+<%- include('../partials/portal-start', { title: 'Health to-do list' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Personal health</span>
+      <h1>Health to-do list</h1>
+      <p>Track simple health tasks such as taking medicine, booking a follow-up, or drinking enough water.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <section class="card">
+      <div class="card-header"><h2>Your tasks</h2><span class="badge badge-info"><%= todos.length %></span></div>
+      <% if (todos.length) { %>
+        <ul class="list">
+          <% todos.forEach((todo) => { %>
+            <li class="list-item">
+              <div class="todo-title">
+                <form action="/student/todos/<%= todo.id %>/toggle" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btn btn-ghost btn-sm"><%= todo.completed ? 'Reopen' : 'Complete' %></button>
+                </form>
+                <div>
+                  <span class="<%= todo.completed ? 'todo-done' : '' %>"><strong><%= todo.title %></strong></span>
+                  <p class="helper"><%= todo.due_date ? 'Due ' + formatDate(todo.due_date) : 'No due date' %></p>
+                </div>
+              </div>
+              <form action="/student/todos/<%= todo.id %>/delete" method="post" data-confirm="Delete this task?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn btn-ghost btn-sm">Delete</button>
+              </form>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <div class="empty-state"><strong>No tasks yet</strong><span>Add a small health task to get started.</span></div>
+      <% } %>
+    </section>
+
+    <aside class="card">
+      <div class="card-header"><h2>Add a task</h2></div>
+      <form action="/student/todos" method="post" class="form" data-submit-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="todo-title">Task</label>
+          <input id="todo-title" name="title" type="text" maxlength="160" required placeholder="e.g. Book follow-up appointment">
+        </div>
+        <div class="field">
+          <label for="todo-due">Due date <span class="muted">(optional)</span></label>
+          <input id="todo-due" name="due_date" type="date">
+        </div>
+        <button type="submit" class="btn btn-primary" data-loading-text="Adding...">Add task</button>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

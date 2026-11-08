@@ -1,0 +1,52 @@
+<%- include('../partials/portal-start', { title: 'Medical records' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Patient portal</span>
+      <h1>My medical records</h1>
+      <p>View records created during your clinic visits and download printable copies.</p>
+    </div>
+  </div>
+
+  <form class="filter-bar" action="/student/records" method="get">
+    <div class="field">
+      <label for="q">Search records</label>
+      <input id="q" name="q" type="search" value="<%= q %>" placeholder="Search diagnosis, symptoms, or clinician">
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-secondary">Search</button>
+    </div>
+  </form>
+
+  <section class="card">
+    <% if (records.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Visit date</th><th>Diagnosis</th><th>Complaint</th><th>Clinician</th><th>Medicines</th><th></th></tr></thead>
+          <tbody>
+            <% records.forEach((record) => { %>
+              <tr>
+                <td class="nowrap"><%= formatDate(record.visit_date) %></td>
+                <td><%= record.diagnosis %></td>
+                <td><%= record.chief_complaint || '—' %></td>
+                <td><%= record.clinician_id?.full_name || 'Clinician' %></td>
+                <td><%= (record.prescriptions || []).length %></td>
+                <td class="table-actions">
+                  <a href="/student/records/<%= record.id %>" class="btn btn-ghost btn-sm">View</a>
+                  <a href="/student/records/<%= record.id %>/pdf" class="btn btn-secondary btn-sm">PDF</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state"><strong>No records found</strong><span>Your medical history will appear here after a clinic visit.</span></div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

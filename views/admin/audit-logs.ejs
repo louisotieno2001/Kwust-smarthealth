@@ -1,0 +1,58 @@
+<%- include('../partials/portal-start', { title: 'Audit logs' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Accountability</span>
+      <h1>Audit logs</h1>
+      <p>Review security-relevant actions across the system.</p>
+    </div>
+  </div>
+
+  <form class="filter-bar" action="/admin/audit-logs" method="get">
+    <div class="field">
+      <label for="q">Search</label>
+      <input id="q" name="q" type="search" value="<%= q %>" placeholder="Action, entity, actor, IP">
+    </div>
+    <div class="field">
+      <label for="action">Action</label>
+      <input id="action" name="action" type="text" value="<%= selectedAction %>" placeholder="e.g. user.login">
+    </div>
+    <div class="field">
+      <label for="date-from">From date</label>
+      <input id="date-from" name="date_from" type="date" value="<%= dateFrom %>">
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+  </form>
+
+  <section class="card">
+    <div class="card-header"><h2>Activity</h2><span class="badge badge-info"><%= logs.length %></span></div>
+    <% if (logs.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Entity ID</th><th>IP address</th></tr></thead>
+          <tbody>
+            <% logs.forEach((log) => { %>
+              <tr>
+                <td class="nowrap"><%= formatDateTime(log.created_at) %></td>
+                <td><%= log.actor_id?.full_name || 'System' %><br><small class="muted"><%= log.actor_id?.role || '' %></small></td>
+                <td><%= log.action %></td>
+                <td><%= log.entity || '—' %></td>
+                <td><%= log.entity_id || '—' %></td>
+                <td><%= log.ip_address || '—' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state"><strong>No audit logs found</strong><span>Activity will appear here as users interact with the system.</span></div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

@@ -1,0 +1,148 @@
+<%- include('../partials/portal-start', { title: 'New medical record' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Clinical documentation</span>
+      <h1>New medical record</h1>
+      <p>Record the visit, diagnosis, and any prescribed medicines. Stock is deducted automatically.</p>
+    </div>
+    <div class="page-actions"><a href="/clinician/records" class="btn btn-secondary">Back to records</a></div>
+  </div>
+
+  <form action="/clinician/records" method="post" class="form" data-submit-once>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <section class="card">
+      <div class="card-header"><h2>Visit details</h2></div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="student-id">Student</label>
+          <select id="student-id" name="student_id" required>
+            <option value="">Select a student</option>
+            <% students.forEach((student) => { %>
+              <option value="<%= student.id %>" <%= String(selectedStudent) === String(student.id) ? 'selected' : '' %>><%= student.full_name %> — <%= student.admission_number %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="appointment-id">Linked appointment <span class="muted">(optional)</span></label>
+          <select id="appointment-id" name="appointment_id">
+            <option value="">No appointment</option>
+            <% appointments.forEach((appointment) => { %>
+              <option value="<%= appointment.id %>" <%= String(selectedAppointment) === String(appointment.id) ? 'selected' : '' %>><%= appointment.student_id?.full_name %> — <%= formatDate(appointment.slot_id?.date) %> <%= formatTime(appointment.slot_id?.start_time) %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="visit-date">Visit date</label>
+          <input id="visit-date" name="visit_date" type="date" value="<%= new Date().toISOString().slice(0, 10) %>" required>
+        </div>
+        <div class="field">
+          <label for="chief-complaint">Chief complaint</label>
+          <input id="chief-complaint" name="chief_complaint" type="text" maxlength="255" placeholder="Main reason for the visit">
+        </div>
+        <div class="field full">
+          <label for="symptoms">Symptoms</label>
+          <textarea id="symptoms" name="symptoms" rows="3" placeholder="Describe the symptoms reported"></textarea>
+        </div>
+        <div class="field full">
+          <label for="diagnosis">Diagnosis</label>
+          <textarea id="diagnosis" name="diagnosis" rows="3" required placeholder="Clinical diagnosis"></textarea>
+        </div>
+        <div class="field full">
+          <label for="notes">Clinical notes</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Treatment plan, advice, follow-up notes"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Prescriptions</h2>
+        <button type="button" class="btn btn-secondary btn-sm" data-add-prescription>Add medicine row</button>
+      </div>
+      <p class="helper">Only medicines with stock can be prescribed. Leave rows blank if no medicines are prescribed.</p>
+
+      <div id="prescription-rows" class="stack">
+        <div class="prescription-row card">
+          <div class="form-grid">
+            <div class="field">
+              <label>Medicine</label>
+              <select name="medicine_id">
+                <option value="">Select medicine</option>
+                <% medicines.forEach((medicine) => { %>
+                  <option value="<%= medicine.id %>"><%= medicine.name %> — <%= medicine.quantity %> <%= medicine.unit %> in stock</option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="field">
+              <label>Quantity</label>
+              <input name="quantity" type="number" min="1" placeholder="e.g. 10">
+            </div>
+            <div class="field">
+              <label>Dosage</label>
+              <input name="dosage" type="text" placeholder="e.g. 500 mg">
+            </div>
+            <div class="field">
+              <label>Frequency</label>
+              <input name="frequency" type="text" placeholder="e.g. twice daily">
+            </div>
+            <div class="field">
+              <label>Duration</label>
+              <input name="duration" type="text" placeholder="e.g. 5 days">
+            </div>
+            <div class="field">
+              <label>Instructions</label>
+              <input name="instructions" type="text" placeholder="e.g. after meals">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template id="prescription-row-template">
+        <div class="prescription-row card">
+          <div class="form-grid">
+            <div class="field">
+              <label>Medicine</label>
+              <select name="medicine_id">
+                <option value="">Select medicine</option>
+                <% medicines.forEach((medicine) => { %>
+                  <option value="<%= medicine.id %>"><%= medicine.name %> — <%= medicine.quantity %> <%= medicine.unit %> in stock</option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="field">
+              <label>Quantity</label>
+              <input name="quantity" type="number" min="1" placeholder="e.g. 10">
+            </div>
+            <div class="field">
+              <label>Dosage</label>
+              <input name="dosage" type="text" placeholder="e.g. 500 mg">
+            </div>
+            <div class="field">
+              <label>Frequency</label>
+              <input name="frequency" type="text" placeholder="e.g. twice daily">
+            </div>
+            <div class="field">
+              <label>Duration</label>
+              <input name="duration" type="text" placeholder="e.g. 5 days">
+            </div>
+            <div class="field">
+              <label>Instructions</label>
+              <input name="instructions" type="text" placeholder="e.g. after meals">
+            </div>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" data-loading-text="Saving record...">Save record and prescriptions</button>
+      <a href="/clinician/records" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</main>
+
+<%- include('../partials/portal-end') %>

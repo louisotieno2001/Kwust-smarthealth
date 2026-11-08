@@ -1,0 +1,175 @@
+<%- include('../partials/portal-start', { title: 'Student dashboard' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <section class="welcome-banner" aria-labelledby="welcome-heading">
+    <h1 id="welcome-heading">Welcome back, <%= user.full_name.split(' ')[0] %>.</h1>
+    <p class="welcome-meta"><%= user.admission_number %></p>
+    <p class="welcome-meta">BSc Computer Science</p>
+    <div class="welcome-details">
+      <div>
+        <span class="welcome-label">Current semester</span>
+        <strong>Sep/Dec 2026/2027</strong>
+      </div>
+      <div>
+        <span class="welcome-label">Campus</span>
+        <strong>Main Campus</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-actions welcome-toolbar">
+    <a href="/student/appointments/book" class="btn btn-primary">Book appointment</a>
+    <a href="/student/records" class="btn btn-secondary">Medical history</a>
+  </div>
+
+  <section class="stat-grid">
+    <article class="stat-card">
+      <div class="stat-label">Upcoming</div>
+      <div class="stat-value"><%= upcoming.length %></div>
+      <div class="stat-hint">Booked appointments</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Medical records</div>
+      <div class="stat-value"><%= records.length %></div>
+      <div class="stat-hint">Recent records shown below</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Reminders</div>
+      <div class="stat-value"><%= reminders.length %></div>
+      <div class="stat-hint">Unread clinic reminders</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">To-do items</div>
+      <div class="stat-value"><%= todos.filter((item) => !item.completed).length %></div>
+      <div class="stat-hint">Open health tasks</div>
+    </article>
+  </section>
+
+  <div class="split mt-2">
+    <section class="card">
+      <div class="card-header">
+        <h2>Upcoming appointments</h2>
+        <a href="/student/appointments" class="btn btn-ghost btn-sm">View all</a>
+      </div>
+      <% if (upcoming.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Time</th><th>Clinician</th><th>Location</th><th></th></tr></thead>
+            <tbody>
+              <% upcoming.forEach((appointment) => { %>
+                <tr>
+                  <td class="nowrap"><%= formatDate(appointment.slot_id?.date) %></td>
+                  <td class="nowrap"><%= formatTime(appointment.slot_id?.start_time) %> – <%= formatTime(appointment.slot_id?.end_time) %></td>
+                  <td><%= appointment.clinician_id?.full_name || 'Clinician' %></td>
+                  <td><%= appointment.slot_id?.location || 'Health Center' %></td>
+                  <td class="table-actions">
+                    <form action="/student/appointments/<%= appointment.id %>/cancel" method="post" data-confirm="Cancel this appointment?">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-ghost btn-sm">Cancel</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <strong>No upcoming appointments</strong>
+          <span>Book a slot when you need to see a clinician.</span>
+          <div class="mt-1"><a href="/student/appointments/book" class="btn btn-primary btn-sm">Find a slot</a></div>
+        </div>
+      <% } %>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <div class="card-header"><h2>Reminders</h2><span class="badge badge-info"><%= reminders.length %> unread</span></div>
+        <% if (reminders.length) { %>
+          <ul class="list">
+            <% reminders.slice(0, 5).forEach((reminder) => { %>
+              <li class="list-item">
+                <div>
+                  <h4><%= reminder.title %></h4>
+                  <p><%= reminder.message %></p>
+                  <p class="helper"><%= formatDateTime(reminder.created_at) %></p>
+                </div>
+                <form action="/student/reminders/<%= reminder.id %>/read" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btn btn-ghost btn-sm">Mark read</button>
+                </form>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="muted mb-0">No unread reminders.</p>
+        <% } %>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><h2>Health notes</h2><a href="/student/notes" class="btn btn-ghost btn-sm">Open</a></div>
+        <% if (notes.length) { %>
+          <ul class="list">
+            <% notes.forEach((note) => { %>
+              <li class="list-item">
+                <div>
+                  <h4><%= note.title %></h4>
+                  <p><%= note.content.slice(0, 90) %><%= note.content.length > 90 ? '…' : '' %></p>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="muted mb-0">You have not added any health notes yet.</p>
+        <% } %>
+      </section>
+    </aside>
+  </div>
+
+  <div class="split mt-2">
+    <section class="card">
+      <div class="card-header"><h2>Recent medical records</h2><a href="/student/records" class="btn btn-ghost btn-sm">View all</a></div>
+      <% if (records.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Visit date</th><th>Diagnosis</th><th>Clinician</th><th></th></tr></thead>
+            <tbody>
+              <% records.forEach((record) => { %>
+                <tr>
+                  <td class="nowrap"><%= formatDate(record.visit_date) %></td>
+                  <td><%= record.diagnosis %></td>
+                  <td><%= record.clinician_id?.full_name || 'Clinician' %></td>
+                  <td><a href="/student/records/<%= record.id %>" class="btn btn-ghost btn-sm">View</a></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state"><strong>No medical records yet</strong><span>Records created during clinic visits will appear here.</span></div>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>To-do list</h2><a href="/student/todos" class="btn btn-ghost btn-sm">Open</a></div>
+      <% if (todos.length) { %>
+        <ul class="list">
+          <% todos.forEach((todo) => { %>
+            <li class="list-item">
+              <span class="todo-title">
+                <span class="badge <%= todo.completed ? 'badge-success' : 'badge-muted' %>"><%= todo.completed ? 'Done' : 'Open' %></span>
+                <span class="<%= todo.completed ? 'todo-done' : '' %>"><%= todo.title %></span>
+              </span>
+              <small class="muted"><%= todo.due_date ? formatDate(todo.due_date) : '' %></small>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="muted mb-0">No health tasks yet.</p>
+      <% } %>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

@@ -1,0 +1,82 @@
+<%- include('../partials/portal-start', { title: 'Appointment slots' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Scheduling</span>
+      <h1>Appointment slots</h1>
+      <p>Create time slots that students can book. Each slot has a date, time range, and capacity.</p>
+    </div>
+    <div class="page-actions"><a href="/clinician/appointments" class="btn btn-secondary">Appointments</a></div>
+  </div>
+
+  <div class="split">
+    <section class="card">
+      <div class="card-header"><h2>Your slots</h2><span class="badge badge-info"><%= slots.length %></span></div>
+      <% if (slots.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Time</th><th>Capacity</th><th>Booked</th><th>Location</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <% slots.forEach((slot) => { %>
+                <tr>
+                  <td class="nowrap"><%= formatDate(slot.date) %></td>
+                  <td class="nowrap"><%= formatTime(slot.start_time) %> – <%= formatTime(slot.end_time) %></td>
+                  <td><%= slot.capacity %></td>
+                  <td><%= slot.booked_count %> (<%= slot.remaining %> left)</td>
+                  <td><%= slot.location || 'Health Center' %></td>
+                  <td><span class="badge badge-<%= statusClass(slot.status) %>"><%= statusLabel(slot.status) %></span></td>
+                  <td class="table-actions">
+                    <% if (slot.status === 'open') { %>
+                      <form action="/clinician/slots/<%= slot.id %>/close" method="post" data-confirm="Close this slot? Students will no longer be able to book it.">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-ghost btn-sm">Close</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state"><strong>No slots created</strong><span>Create your first slot using the form.</span></div>
+      <% } %>
+    </section>
+
+    <aside class="card">
+      <div class="card-header"><h2>Create a slot</h2></div>
+      <form action="/clinician/slots" method="post" class="form" data-submit-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="slot-date">Date</label>
+          <input id="slot-date" name="date" type="date" required>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="start-time">Start time</label>
+            <input id="start-time" name="start_time" type="time" required>
+          </div>
+          <div class="field">
+            <label for="end-time">End time</label>
+            <input id="end-time" name="end_time" type="time" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="capacity">Capacity</label>
+            <input id="capacity" name="capacity" type="number" min="1" max="100" value="5" required>
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <input id="location" name="location" type="text" value="University Health Center">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" data-loading-text="Creating...">Create slot</button>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

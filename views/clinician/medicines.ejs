@@ -1,0 +1,118 @@
+<%- include('../partials/portal-start', { title: 'Medicine inventory' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Inventory</span>
+      <h1>Medicine inventory</h1>
+      <p>Track medicine stock, reorder levels, and expiry dates.</p>
+    </div>
+  </div>
+
+  <form class="filter-bar" action="/clinician/medicines" method="get">
+    <div class="field">
+      <label for="q">Search</label>
+      <input id="q" name="q" type="search" value="<%= q %>" placeholder="Medicine name or description">
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="">All categories</option>
+        <% categories.forEach((category) => { %>
+          <option value="<%= category %>" <%= selectedCategory === category ? 'selected' : '' %>><%= category %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">All statuses</option>
+        <option value="available" <%= selectedStatus === 'available' ? 'selected' : '' %>>Available</option>
+        <option value="low_stock" <%= selectedStatus === 'low_stock' ? 'selected' : '' %>>Low stock</option>
+        <option value="out_of_stock" <%= selectedStatus === 'out_of_stock' ? 'selected' : '' %>>Out of stock</option>
+        <option value="expired" <%= selectedStatus === 'expired' ? 'selected' : '' %>>Expired</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+  </form>
+
+  <div class="split">
+    <section class="card">
+      <div class="card-header"><h2>Medicines</h2><span class="badge badge-info"><%= medicines.length %></span></div>
+      <% if (medicines.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Reorder at</th><th>Expiry</th><th>Status</th><th>Update stock</th></tr></thead>
+            <tbody>
+              <% medicines.forEach((medicine) => { %>
+                <tr>
+                  <td><strong><%= medicine.name %></strong><br><small class="muted"><%= medicine.description || '' %></small></td>
+                  <td><%= medicine.category %></td>
+                  <td class="nowrap"><%= medicine.quantity %> <%= medicine.unit %></td>
+                  <td><%= medicine.reorder_level %></td>
+                  <td class="nowrap"><%= medicine.expiry_date ? formatDate(medicine.expiry_date) : '—' %></td>
+                  <td><span class="badge badge-<%= statusClass(medicine.effective_status) %>"><%= statusLabel(medicine.effective_status) %></span></td>
+                  <td>
+                    <form action="/clinician/medicines/<%= medicine.id %>/stock" method="post" class="table-actions">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input name="quantity" type="number" min="0" value="<%= medicine.quantity %>" aria-label="New quantity for <%= medicine.name %>" class="nowrap">
+                      <button type="submit" class="btn btn-ghost btn-sm">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state"><strong>No medicines found</strong><span>Add a medicine using the form.</span></div>
+      <% } %>
+    </section>
+
+    <aside class="card">
+      <div class="card-header"><h2>Add medicine</h2></div>
+      <form action="/clinician/medicines" method="post" class="form" data-submit-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="med-name">Name</label>
+          <input id="med-name" name="name" type="text" required>
+        </div>
+        <div class="field">
+          <label for="med-category">Category</label>
+          <input id="med-category" name="category" type="text" placeholder="e.g. Analgesic">
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="med-quantity">Quantity</label>
+            <input id="med-quantity" name="quantity" type="number" min="0" value="0" required>
+          </div>
+          <div class="field">
+            <label for="med-unit">Unit</label>
+            <input id="med-unit" name="unit" type="text" value="tablets">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="med-reorder">Reorder level</label>
+            <input id="med-reorder" name="reorder_level" type="number" min="0" value="5">
+          </div>
+          <div class="field">
+            <label for="med-expiry">Expiry date</label>
+            <input id="med-expiry" name="expiry_date" type="date">
+          </div>
+        </div>
+        <div class="field">
+          <label for="med-description">Description</label>
+          <textarea id="med-description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" data-loading-text="Adding...">Add medicine</button>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

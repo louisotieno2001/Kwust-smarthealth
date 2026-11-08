@@ -1,0 +1,103 @@
+<%- include('../partials/portal-start', { title: 'User management' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Administration</span>
+      <h1>User management</h1>
+      <p>Verify pending accounts, suspend access, or reactivate users.</p>
+    </div>
+  </div>
+
+  <form class="filter-bar" action="/admin/users" method="get">
+    <div class="field">
+      <label for="q">Search</label>
+      <input id="q" name="q" type="search" value="<%= q %>" placeholder="Name, email, admission number">
+    </div>
+    <div class="field">
+      <label for="role">Role</label>
+      <select id="role" name="role">
+        <option value="">All roles</option>
+        <option value="student" <%= selectedRole === 'student' ? 'selected' : '' %>>Student</option>
+        <option value="clinician" <%= selectedRole === 'clinician' ? 'selected' : '' %>>Clinician</option>
+        <option value="admin" <%= selectedRole === 'admin' ? 'selected' : '' %>>Administrator</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">All statuses</option>
+        <option value="active" <%= selectedStatus === 'active' ? 'selected' : '' %>>Active</option>
+        <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+        <option value="suspended" <%= selectedStatus === 'suspended' ? 'selected' : '' %>>Suspended</option>
+        <option value="rejected" <%= selectedStatus === 'rejected' ? 'selected' : '' %>>Rejected</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+  </form>
+
+  <section class="card">
+    <div class="card-header"><h2>Accounts</h2><span class="badge badge-info"><%= users.length %></span></div>
+    <% if (users.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Role</th><th>Identifier</th><th>Status</th><th>Created</th><th>Last login</th><th>Actions</th></tr></thead>
+          <tbody>
+            <% users.forEach((account) => { %>
+              <tr>
+                <td><strong><%= account.full_name %></strong><br><small class="muted"><%= account.email || account.phone || '' %></small></td>
+                <td><%= roleLabel(account.role) %><% if (account.staff_title) { %><br><small class="muted"><%= account.staff_title %></small><% } %></td>
+                <td><%= account.role === 'student' ? (account.admission_number || '—') : (account.email || '—') %></td>
+                <td>
+                  <span class="badge badge-<%= statusClass(account.status) %>"><%= statusLabel(account.status) %></span>
+                  <% if (account.role !== 'student') { %>
+                    <br><span class="badge badge-<%= account.is_verified ? 'success' : 'warning' %>"><%= account.is_verified ? 'Verified' : 'Not verified' %></span>
+                  <% } %>
+                </td>
+                <td class="nowrap"><%= formatDate(account.created_at) %></td>
+                <td class="nowrap"><%= account.last_login_at ? formatDateTime(account.last_login_at) : '—' %></td>
+                <td class="table-actions">
+                  <% const needsVerification = account.role !== 'student' && !account.is_verified; %>
+                  <% if (needsVerification && account.status !== 'rejected') { %>
+                    <form action="/admin/users/<%= account.id %>/verify" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-primary btn-sm">Verify</button>
+                    </form>
+                  <% } %>
+                  <% if (account.status === 'pending') { %>
+                    <form action="/admin/users/<%= account.id %>/reject" method="post" data-confirm="Reject this account request?">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-ghost btn-sm">Reject</button>
+                    </form>
+                  <% } else if (account.status === 'active') { %>
+                    <% if (String(account.id) !== String(user.id)) { %>
+                      <form action="/admin/users/<%= account.id %>/suspend" method="post" data-confirm="Suspend this account?">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-ghost btn-sm">Suspend</button>
+                      </form>
+                    <% } else { %>
+                      <span class="tag">You</span>
+                    <% } %>
+                  <% } else if (account.status === 'suspended' || account.status === 'rejected') { %>
+                    <form action="/admin/users/<%= account.id %>/reactivate" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state"><strong>No users found</strong><span>Try clearing the filters.</span></div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

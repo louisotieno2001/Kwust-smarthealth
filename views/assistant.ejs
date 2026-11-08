@@ -1,0 +1,34 @@
+<%- include('partials/portal-start', { title: 'Health assistant' }) %>
+
+<main id="main" class="container">
+  <%- include('partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Health assistant</span>
+      <h1>Ask about your health</h1>
+      <p>Get general health information from the KWUST SmartHealth assistant.</p>
+    </div>
+  </div>
+
+  <section class="card assistant-card" data-chat data-chat-user="<%= user.full_name %>" data-chat-user-id="<%= user.id %>">
+    <div class="chat-messages" data-chat-messages aria-live="polite">
+      <div class="chat-message bot" data-chat-greeting>
+        <span class="chat-avatar" aria-hidden="true"><%- include('partials/portal-icon', { name: 'bot' }) %></span>
+        <div class="chat-bubble">Hello. I can share general health information. I do not diagnose or replace a clinician. How can I help today?</div>
+      </div>
+    </div>
+    <form class="chat-form" data-chat-form>
+      <label class="sr-only" for="assistant-input">Your health question</label>
+      <input type="text" id="assistant-input" name="message" maxlength="1200" placeholder="Ask a general health question..." data-chat-input autocomplete="off" required>
+      <button type="submit" class="btn btn-primary chat-send" data-chat-send aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
+      </button>
+    </form>
+    <div class="chat-footer">
+      <p class="chat-disclaimer">History is saved only in this browser on this device. For emergencies, contact the health center immediately.</p>
+      <button type="button" class="btn btn-ghost btn-sm" data-chat-clear>Clear history</button>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/portal-end') %>

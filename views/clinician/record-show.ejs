@@ -1,0 +1,55 @@
+<%- include('../partials/portal-start', { title: 'Medical record' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Medical record</span>
+      <h1>Visit on <%= formatDate(record.visit_date) %></h1>
+      <p><%= record.student_id?.full_name %> · <%= record.student_id?.admission_number %></p>
+    </div>
+    <div class="page-actions">
+      <a href="/clinician/records" class="btn btn-secondary">Back to records</a>
+      <a href="/clinician/records/<%= record.id %>/pdf" class="btn btn-primary">Record PDF</a>
+      <a href="/clinician/prescriptions/<%= record.id %>/pdf" class="btn btn-secondary">Prescription PDF</a>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card-header"><h2>Patient details</h2></div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="meta-label">Student</div><div class="meta-value"><%= record.student_id?.full_name %></div></div>
+      <div class="meta-item"><div class="meta-label">Admission number</div><div class="meta-value"><%= record.student_id?.admission_number %></div></div>
+      <div class="meta-item"><div class="meta-label">Visit date</div><div class="meta-value"><%= formatDate(record.visit_date) %></div></div>
+    </div>
+  </section>
+
+  <section class="card mt-2">
+    <div class="card-header"><h2>Clinical notes</h2></div>
+    <div class="grid grid-2">
+      <div><h3 class="card-subtitle">Chief complaint</h3><p><%= record.chief_complaint || 'Not recorded' %></p></div>
+      <div><h3 class="card-subtitle">Symptoms</h3><p><%= record.symptoms || 'Not recorded' %></p></div>
+      <div><h3 class="card-subtitle">Diagnosis</h3><p><%= record.diagnosis || 'Not recorded' %></p></div>
+      <div><h3 class="card-subtitle">Notes</h3><p><%= record.notes || 'Not recorded' %></p></div>
+    </div>
+  </section>
+
+  <section class="card mt-2">
+    <div class="card-header"><h2>Prescriptions</h2><span class="badge badge-info"><%= (record.prescriptions || []).length %> items</span></div>
+    <% if ((record.prescriptions || []).length) { %>
+      <div class="prescription-list">
+        <% record.prescriptions.forEach((item) => { %>
+          <div class="prescription-item">
+            <strong><%= item.medicine_id?.name || 'Medicine' %></strong>
+            <p>Dosage: <%= item.dosage || 'N/A' %> · Frequency: <%= item.frequency || 'N/A' %> · Duration: <%= item.duration || 'N/A' %> · Quantity: <%= item.quantity || 'N/A' %></p>
+            <% if (item.instructions) { %><p>Instructions: <%= item.instructions %></p><% } %>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p class="muted mb-0">No medicines were prescribed for this visit.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

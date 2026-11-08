@@ -1,0 +1,143 @@
+<%- include('../partials/portal-start', { title: 'Admin dashboard' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Administration</span>
+      <h1>System overview</h1>
+      <p>Monitor users, appointments, records, medicine stock, and recent activity.</p>
+    </div>
+    <div class="page-actions">
+      <a href="/admin/users" class="btn btn-primary">Manage users</a>
+      <a href="/admin/reports" class="btn btn-secondary">View reports</a>
+    </div>
+  </div>
+
+  <section class="stat-grid">
+    <article class="stat-card">
+      <div class="stat-label">Students</div>
+      <div class="stat-value"><%= stats.studentCount %></div>
+      <div class="stat-hint">Registered student accounts</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Clinicians</div>
+      <div class="stat-value"><%= stats.clinicianCount %></div>
+      <div class="stat-hint">Clinical staff accounts</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Booked appointments</div>
+      <div class="stat-value"><%= stats.appointmentCount %></div>
+      <div class="stat-hint">Currently booked</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Pending approvals</div>
+      <div class="stat-value"><%= stats.pendingCount %></div>
+      <div class="stat-hint">Accounts awaiting verification</div>
+    </article>
+  </section>
+
+  <div class="split mt-2">
+    <section class="card">
+      <div class="card-header"><h2>Pending accounts</h2><a href="/admin/users?status=pending" class="btn btn-ghost btn-sm">View all</a></div>
+      <% if (pendingUsers.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Created</th><th></th></tr></thead>
+            <tbody>
+              <% pendingUsers.forEach((pending) => { %>
+                <tr>
+                  <td><%= pending.full_name %></td>
+                  <td><%= roleLabel(pending.role) %></td>
+                  <td><%= pending.email || '—' %></td>
+                  <td class="nowrap"><%= formatDate(pending.created_at) %></td>
+                  <td class="table-actions">
+                    <form action="/admin/users/<%= pending.id %>/verify" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-primary btn-sm">Verify</button>
+                    </form>
+                    <form action="/admin/users/<%= pending.id %>/reject" method="post" data-confirm="Reject this account request?">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-ghost btn-sm">Reject</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state"><strong>No pending accounts</strong><span>New clinician and administrator requests will appear here.</span></div>
+      <% } %>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <div class="card-header"><h2>System health</h2></div>
+        <div class="meta-grid">
+          <div class="meta-item"><div class="meta-label">Records</div><div class="meta-value"><%= stats.recordCount %></div></div>
+          <div class="meta-item"><div class="meta-label">Administrators</div><div class="meta-value"><%= stats.adminCount %></div></div>
+          <div class="meta-item"><div class="meta-label">Stock alerts</div><div class="meta-value"><%= stats.lowStockCount %></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-header"><h2>Low stock</h2><a href="/admin/medicines?status=low_stock" class="btn btn-ghost btn-sm">Open</a></div>
+        <% if (stats.lowStock.length) { %>
+          <ul class="list">
+            <% stats.lowStock.slice(0, 6).forEach((medicine) => { %>
+              <li class="list-item">
+                <div><h4><%= medicine.name %></h4><p><%= medicine.quantity %> <%= medicine.unit %> remaining</p></div>
+                <span class="badge badge-<%= statusClass(medicine.effective_status) %>"><%= statusLabel(medicine.effective_status) %></span>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="muted mb-0">All medicines are above their reorder levels.</p>
+        <% } %>
+      </section>
+    </aside>
+  </div>
+
+  <div class="split mt-2">
+    <section class="card">
+      <div class="card-header"><h2>Recent audit activity</h2><a href="/admin/audit-logs" class="btn btn-ghost btn-sm">Audit logs</a></div>
+      <% if (recentLogs.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th></tr></thead>
+            <tbody>
+              <% recentLogs.forEach((log) => { %>
+                <tr>
+                  <td class="nowrap"><%= formatDateTime(log.created_at) %></td>
+                  <td><%= log.actor_id?.full_name || 'System' %></td>
+                  <td><%= log.action %></td>
+                  <td><%= log.entity || '—' %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="muted mb-0">No audit activity recorded yet.</p>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>Recent records</h2><a href="/admin/records" class="btn btn-ghost btn-sm">View all</a></div>
+      <% if (recentRecords.length) { %>
+        <ul class="list">
+          <% recentRecords.forEach((record) => { %>
+            <li class="list-item">
+              <div><h4><%= record.student_id?.full_name %></h4><p><%= record.diagnosis %></p></div>
+              <a href="/admin/records/<%= record.id %>" class="btn btn-ghost btn-sm">View</a>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="muted mb-0">No medical records yet.</p>
+      <% } %>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/portal-end') %>

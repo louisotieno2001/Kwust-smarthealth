@@ -1,0 +1,11 @@
+<%- include('../partials/head', { title: 'Forbidden' }) %>
+<%- include('../partials/header') %>
+<main id="main" class="container">
+  <section class="card center-card-sm">
+    <span class="eyebrow">403</span>
+    <h1><%= title %></h1>
+    <p class="muted"><%= typeof message !== 'undefined' && message ? message : 'You do not have permission to access this page.' %></p>
+    <a href="/" class="btn btn-primary">Return home</a>
+  </section>
+</main>
+<%- include('../partials/footer') %>

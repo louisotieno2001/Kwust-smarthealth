@@ -1,0 +1,68 @@
+<%- include('head', { title: typeof title !== 'undefined' ? title : 'Dashboard' }) %>
+<%
+  const portalHome = user.role === 'student' ? '/student/dashboard' : user.role === 'clinician' ? '/clinician/dashboard' : '/admin/dashboard';
+  const portalLabel = user.role === 'student' ? 'Student portal' : user.role === 'clinician' ? 'Clinician workspace' : 'Administration';
+%>
+<div class="portal-shell">
+  <aside class="portal-sidebar" id="portal-sidebar" aria-label="<%= portalLabel %> navigation">
+    <a class="brand" href="<%= portalHome %>">
+      <img src="/images/kwust.jpg" alt="KWUST logo" class="brand-logo">
+      <span class="brand-text">
+        <strong>KWUST SmartHealth</strong>
+        <small>University Health Center</small>
+      </span>
+    </a>
+
+    <nav class="portal-nav">
+      <span class="portal-nav-label"><%= portalLabel %></span>
+      <% if (user.role === 'student') { %>
+        <a href="/student/dashboard" class="<%= currentPath === '/student/dashboard' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'dashboard' }) %></span><span>Dashboard</span></a>
+        <a href="/student/appointments" class="<%= currentPath.startsWith('/student/appointments') ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'calendar' }) %></span><span>Appointments</span></a>
+        <a href="/student/records" class="<%= currentPath.startsWith('/student/records') ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'records' }) %></span><span>Medical records</span></a>
+        <a href="/student/notes" class="<%= currentPath === '/student/notes' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'notes' }) %></span><span>Health notes</span></a>
+        <a href="/student/todos" class="<%= currentPath === '/student/todos' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'todo' }) %></span><span>To-do list</span></a>
+      <% } else if (user.role === 'clinician') { %>
+        <a href="/clinician/dashboard" class="<%= currentPath === '/clinician/dashboard' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'dashboard' }) %></span><span>Dashboard</span></a>
+        <a href="/clinician/appointments" class="<%= currentPath.startsWith('/clinician/appointments') ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'calendar' }) %></span><span>Appointments</span></a>
+        <a href="/clinician/slots" class="<%= currentPath === '/clinician/slots' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'clock' }) %></span><span>Availability slots</span></a>
+        <a href="/clinician/records" class="<%= currentPath.startsWith('/clinician/records') ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'records' }) %></span><span>Medical records</span></a>
+        <a href="/clinician/medicines" class="<%= currentPath === '/clinician/medicines' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'medicine' }) %></span><span>Medicines</span></a>
+        <a href="/clinician/reminders" class="<%= currentPath === '/clinician/reminders' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'bell' }) %></span><span>Reminders</span></a>
+      <% } else { %>
+        <a href="/admin/dashboard" class="<%= currentPath === '/admin/dashboard' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'dashboard' }) %></span><span>Dashboard</span></a>
+        <a href="/admin/users" class="<%= currentPath === '/admin/users' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'users' }) %></span><span>Users</span></a>
+        <a href="/admin/records" class="<%= currentPath.startsWith('/admin/records') ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'records' }) %></span><span>Medical records</span></a>
+        <a href="/admin/medicines" class="<%= currentPath === '/admin/medicines' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'medicine' }) %></span><span>Medicines</span></a>
+        <a href="/admin/audit-logs" class="<%= currentPath === '/admin/audit-logs' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'history' }) %></span><span>Audit logs</span></a>
+        <a href="/admin/reports" class="<%= currentPath === '/admin/reports' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'chart' }) %></span><span>Reports</span></a>
+      <% } %>
+      <a href="/assistant" class="<%= currentPath === '/assistant' ? 'active' : '' %>"><span class="portal-nav-icon" aria-hidden="true"><%- include('portal-icon', { name: 'assistant' }) %></span><span>Health assistant</span></a>
+    </nav>
+
+    <div class="portal-sidebar-footer">
+      <div class="portal-user">
+        <span class="avatar"><%= initials(user.full_name) %></span>
+        <span class="portal-user-text">
+          <strong title="<%= user.full_name %>"><%= user.full_name %></strong>
+          <small><%= roleLabel(user.role) %></small>
+        </span>
+      </div>
+      <div class="portal-sidebar-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="theme-icon" aria-hidden="true">◐</span>
+          Theme
+        </button>
+        <form action="/auth/logout" method="post" class="inline-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <div class="portal-overlay" id="portal-overlay" hidden></div>
+
+  <div class="portal-content<%= currentPath === '/assistant' ? ' assistant-content' : '' %>">
+    <button class="portal-menu-toggle" id="portal-menu-toggle" type="button" aria-expanded="false" aria-controls="portal-sidebar">
+      Menu
+    </button>

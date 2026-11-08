@@ -1,0 +1,132 @@
+<%- include('../partials/portal-start', { title: 'Clinician dashboard' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Clinician workspace</span>
+      <h1>Good day, <%= user.full_name.split(' ')[0] %>.</h1>
+      <p>Here is your clinic activity for <%= formatDate(new Date()) %>.</p>
+    </div>
+    <div class="page-actions">
+      <a href="/clinician/records/new" class="btn btn-primary">New medical record</a>
+      <a href="/clinician/slots" class="btn btn-secondary">Manage slots</a>
+    </div>
+  </div>
+
+  <section class="stat-grid">
+    <article class="stat-card">
+      <div class="stat-label">Today's appointments</div>
+      <div class="stat-value"><%= todayAppointments.length %></div>
+      <div class="stat-hint">Booked for today</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Upcoming</div>
+      <div class="stat-value"><%= upcoming.length %></div>
+      <div class="stat-hint">All booked appointments</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Open slots</div>
+      <div class="stat-value"><%= availableSlots.length %></div>
+      <div class="stat-hint">Slots with capacity</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Stock alerts</div>
+      <div class="stat-value"><%= lowStock.length %></div>
+      <div class="stat-hint">Low, out of stock, or expired</div>
+    </article>
+  </section>
+
+  <div class="split mt-2">
+    <section class="card">
+      <div class="card-header">
+        <h2>Today's appointments</h2>
+        <a href="/clinician/appointments" class="btn btn-ghost btn-sm">All appointments</a>
+      </div>
+      <% if (todayAppointments.length) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Time</th><th>Student</th><th>Reason</th><th></th></tr></thead>
+            <tbody>
+              <% todayAppointments.forEach((appointment) => { %>
+                <tr>
+                  <td class="nowrap"><%= formatTime(appointment.slot_id?.start_time) %> – <%= formatTime(appointment.slot_id?.end_time) %></td>
+                  <td><%= appointment.student_id?.full_name %><br><small class="muted"><%= appointment.student_id?.admission_number %></small></td>
+                  <td><%= appointment.reason || '—' %></td>
+                  <td><a href="/clinician/records/new?student_id=<%= appointment.student_id?.id %>&appointment_id=<%= appointment.id %>" class="btn btn-primary btn-sm">Create record</a></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state"><strong>No appointments today</strong><span>Your booked appointments will appear here.</span></div>
+      <% } %>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <div class="card-header"><h2>Stock alerts</h2><a href="/clinician/medicines" class="btn btn-ghost btn-sm">Inventory</a></div>
+        <% if (lowStock.length) { %>
+          <ul class="list">
+            <% lowStock.slice(0, 6).forEach((medicine) => { %>
+              <li class="list-item">
+                <div>
+                  <h4><%= medicine.name %></h4>
+                  <p><%= medicine.quantity %> <%= medicine.unit %> in stock</p>
+                </div>
+                <span class="badge badge-<%= statusClass(medicine.effective_status) %>"><%= statusLabel(medicine.effective_status) %></span>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="muted mb-0">No stock alerts.</p>
+        <% } %>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><h2>Upcoming slots</h2><a href="/clinician/slots" class="btn btn-ghost btn-sm">Manage</a></div>
+        <% if (availableSlots.length) { %>
+          <ul class="list">
+            <% availableSlots.slice(0, 5).forEach((slot) => { %>
+              <li class="list-item">
+                <div>
+                  <h4><%= formatDate(slot.date) %></h4>
+                  <p><%= formatTime(slot.start_time) %> – <%= formatTime(slot.end_time) %> · <%= slot.remaining %> left</p>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="muted mb-0">No open slots.</p>
+        <% } %>
+      </section>
+    </aside>
+  </div>
+
+  <section class="card mt-2">
+    <div class="card-header"><h2>Recent records</h2><a href="/clinician/records" class="btn btn-ghost btn-sm">View all</a></div>
+    <% if (records.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Visit date</th><th>Student</th><th>Diagnosis</th><th>Medicines</th><th></th></tr></thead>
+          <tbody>
+            <% records.forEach((record) => { %>
+              <tr>
+                <td class="nowrap"><%= formatDate(record.visit_date) %></td>
+                <td><%= record.student_id?.full_name %></td>
+                <td><%= record.diagnosis %></td>
+                <td><%= (record.prescriptions || []).length %></td>
+                <td><a href="/clinician/records/<%= record.id %>" class="btn btn-ghost btn-sm">View</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state"><strong>No records yet</strong><span>Create a medical record after a visit.</span></div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

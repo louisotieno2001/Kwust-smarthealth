@@ -1,0 +1,57 @@
+<%- include('../partials/portal-start', { title: 'Medical records' }) %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Clinical records</span>
+      <h1>Medical records</h1>
+      <p>Search records you have created and download printable copies.</p>
+    </div>
+    <div class="page-actions"><a href="/clinician/records/new" class="btn btn-primary">New record</a></div>
+  </div>
+
+  <form class="filter-bar" action="/clinician/records" method="get">
+    <div class="field">
+      <label for="q">Search</label>
+      <input id="q" name="q" type="search" value="<%= q %>" placeholder="Student, admission number, diagnosis">
+    </div>
+    <div class="field">
+      <label for="diagnosis">Diagnosis</label>
+      <input id="diagnosis" name="diagnosis" type="search" value="<%= diagnosis %>" placeholder="Filter by diagnosis">
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-secondary">Search</button>
+    </div>
+  </form>
+
+  <section class="card">
+    <% if (records.length) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Visit date</th><th>Student</th><th>Admission no.</th><th>Diagnosis</th><th>Medicines</th><th></th></tr></thead>
+          <tbody>
+            <% records.forEach((record) => { %>
+              <tr>
+                <td class="nowrap"><%= formatDate(record.visit_date) %></td>
+                <td><%= record.student_id?.full_name %></td>
+                <td><%= record.student_id?.admission_number %></td>
+                <td><%= record.diagnosis %></td>
+                <td><%= (record.prescriptions || []).length %></td>
+                <td class="table-actions">
+                  <a href="/clinician/records/<%= record.id %>" class="btn btn-ghost btn-sm">View</a>
+                  <a href="/clinician/records/<%= record.id %>/pdf" class="btn btn-secondary btn-sm">PDF</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state"><strong>No records found</strong><span>Create a medical record after a student visit.</span></div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/portal-end') %>

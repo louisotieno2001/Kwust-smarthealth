@@ -1,0 +1,48 @@
+<%- include('../partials/head', { title: 'Log in' }) %>
+<%- include('../partials/header') %>
+
+<main id="main" class="container">
+  <div class="auth-shell">
+    <aside class="auth-aside">
+      <span class="eyebrow">Welcome back</span>
+      <h1>Sign in to KWUST SmartHealth</h1>
+      <p class="muted">Students log in with their admission number. Clinicians and administrators log in with their email address.</p>
+      <div class="card mt-2">
+        <h3>Login rules</h3>
+        <ul class="list">
+          <li class="list-item"><span><strong>Students</strong><p class="muted">Use any accepted admission number format, such as BBIT/45/26.</p></span></li>
+          <li class="list-item"><span><strong>Clinicians &amp; administrators</strong><p class="muted">Use the email address registered on your account.</p></span></li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="card auth-card">
+      <%- include('../partials/flash') %>
+      <div class="card-header">
+        <h2>Log in</h2>
+        <span class="tag">Secure session</span>
+      </div>
+      <form action="/auth/login" method="post" class="form" data-submit-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="identifier">Admission number or email</label>
+          <input id="identifier" name="identifier" type="text" autocomplete="username" placeholder="BBIT/45/26 or you@kwust.ac.ke" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" data-loading-text="Logging in...">Log in</button>
+      </form>
+      <div class="auth-links mt-2">
+        <span class="muted">New here? <a href="/signup">Create an account</a></span>
+        <a href="/">Back to home</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
